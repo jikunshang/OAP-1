@@ -951,7 +951,7 @@ class ExternalCache(fiberType: FiberType) extends OapCache with Logging {
     }
     catch {
       case e: DuplicateObjectException =>
-        logWarning("plasma object duplucate" + e.getMessage + " Will get this object.")
+        logWarning("plasma object duplicate " + e.getMessage + " Will get this object.")
         // FIXME: this obj may not be sealed, get may throw exception
         val plasmaClient = plasmaClientPool(clientRoundRobin.getAndAdd(1) % clientPoolSize)
         val buf: ByteBuffer = plasmaClient.getObjAsByteBuffer(objectId, -1, false)
@@ -1060,7 +1060,6 @@ class ExternalCache(fiberType: FiberType) extends OapCache with Logging {
     // Remove plasmaClient.list() since this call have a lot overhead,
     // especially in multi executor case
     cacheTotalCount = new AtomicLong(fiberSet.size)
-    logDebug("cache total size is " + cacheTotalCount)
     fiberSet.toSet
   }
 
