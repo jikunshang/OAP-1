@@ -935,7 +935,7 @@ class ExternalCache(fiberType: FiberType) extends OapCache with Logging {
     OapRuntime.getOrCreate.fiberCacheManager.getEmptyDataFiberCache(fiberLength)
 
   private def DataFiber(bb: ByteBuffer, objectId: Array[Byte],
-                        client: plasma.PlasmaClient): FiberCache = {
+    client: plasma.PlasmaClient): FiberCache = {
     val fiberData = MemoryBlockHolder(null, bb.asInstanceOf[DirectBuffer].address(),
                                       bb.capacity(), bb.capacity(), SourceEnum.PM, objectId, client)
     assert(fiberData.client != null)
