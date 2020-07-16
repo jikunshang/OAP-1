@@ -22,7 +22,6 @@ import java.util.concurrent.atomic.AtomicLong
 import java.util.concurrent.locks.ReentrantReadWriteLock
 
 import com.google.common.cache._
-import org.apache.arrow.plasma.PlasmaClient
 import org.apache.hadoop.fs.FSDataInputStream
 
 import org.apache.spark.SparkEnv
@@ -70,8 +69,6 @@ private[sql] class FiberCacheManager(
   def dcpmmWaitingThreshold: Long = _dcpmmWaitingThreshold
   def inMixMode: Boolean = cacheAllocator.separateMemory
 
-  var clients: Array[PlasmaClient] = null
-
   private val cacheBackend: OapCache = {
     if (!inMixMode) {
       dataCacheMemorySize = dataCacheMemorySize + indexCacheMemorySize
@@ -88,7 +85,6 @@ private[sql] class FiberCacheManager(
       new VMemCache(FiberType.DATA)
     } else if (cacheName.equals(EXTERNAL_CACHE)) {
       val cache = new ExternalCache(FiberType.DATA)
-      clients = cache.plasmaClientPool
       cache
     } else if (cacheName.equals(MIX_CACHE)) {
       val separateCache = sparkEnv.conf.getBoolean(

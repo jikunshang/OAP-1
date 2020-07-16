@@ -57,8 +57,6 @@ case class FiberCache(fiberType: FiberType.FiberType, fiberData: MemoryBlockHold
   // This suppose to be used when index cache allocation failed
   var originByteArray: Array[Byte] = null
 
-  var plasmaClient: PlasmaClient = null
-
   // We use readLock to lock occupy. _refCount need be atomic to make sure thread-safe
   protected val _refCount = new AtomicLong(0)
   def refCount: Long = _refCount.get()
