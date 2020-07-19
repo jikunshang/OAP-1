@@ -21,7 +21,6 @@ import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicLong
 
 import com.google.common.primitives.Ints
-import org.apache.arrow.plasma.PlasmaClient
 import scala.collection.mutable
 
 import org.apache.spark.internal.Logging
