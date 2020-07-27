@@ -17,42 +17,13 @@
 
 package org.apache.spark.sql
 
-import java.io.{ByteArrayOutputStream, File}
-import java.nio.charset.StandardCharsets
-import java.sql.{Date, Timestamp}
-import java.util.UUID
-import java.util.concurrent.atomic.AtomicLong
-
-import scala.reflect.runtime.universe.TypeTag
-import scala.util.Random
-
-import org.scalatest.Matchers._
-
-import org.apache.spark.SparkException
-import org.apache.spark.scheduler.{SparkListener, SparkListenerJobEnd}
-import org.apache.spark.sql.catalyst.TableIdentifier
-import org.apache.spark.sql.catalyst.encoders.{ExpressionEncoder, RowEncoder}
-import org.apache.spark.sql.catalyst.expressions.Uuid
-import org.apache.spark.sql.catalyst.optimizer.ConvertToLocalRelation
-import org.apache.spark.sql.catalyst.plans.logical.{LocalRelation, OneRowRelation}
-import org.apache.spark.sql.catalyst.util.DateTimeUtils
-import org.apache.spark.sql.execution.{FilterExec, QueryExecution, WholeStageCodegenExec}
-import org.apache.spark.sql.execution.adaptive.AdaptiveSparkPlanHelper
-import org.apache.spark.sql.execution.aggregate.HashAggregateExec
 import org.apache.spark.sql.execution.exchange.{BroadcastExchangeExec, ReusedExchangeExec, ShuffleExchangeExec}
 import org.apache.spark.sql.functions._
-import org.apache.spark.sql.internal.SQLConf
 import org.apache.spark.sql.internal.oap.OapConf
-import org.apache.spark.sql.test.{ExamplePoint, ExamplePointUDT, SharedSparkSession}
-import org.apache.spark.sql.test.SQLTestData.{DecimalData, TestData2}
-import org.apache.spark.sql.types._
-import org.apache.spark.unsafe.types.CalendarInterval
+import org.apache.spark.sql.test.{SharedSQLContext}
 import org.apache.spark.util.Utils
-import org.apache.spark.util.random.XORShiftRandom
 
-class DataFrameSuite extends QueryTest
-  with SharedSparkSession
-  with AdaptiveSparkPlanHelper {
+class DataFrameSuite extends QueryTest with SharedSQLContext {
   import testImplicits._
 
   test("reuse exchange OAP") {
@@ -78,27 +49,25 @@ class DataFrameSuite extends QueryTest
   }
 
   test("reuse exchange") {
-    withSQLConf(SQLConf.AUTO_BROADCASTJOIN_THRESHOLD.key -> "2") {
+    withSQLConf("spark.sql.autoBroadcastJoinThreshold" -> "2") {
       val df = spark.range(100).toDF()
       val join = df.join(df, "id")
       val plan = join.queryExecution.executedPlan
       checkAnswer(join, df)
       assert(
-        collect(join.queryExecution.executedPlan) {
-          case e: ShuffleExchangeExec => true }.size === 1)
+        join.queryExecution.executedPlan.collect { case e: ShuffleExchangeExec => true }.size === 1)
       assert(
-        collect(join.queryExecution.executedPlan) { case e: ReusedExchangeExec => true }.size === 1)
+        join.queryExecution.executedPlan.collect { case e: ReusedExchangeExec => true }.size === 1)
       val broadcasted = broadcast(join)
       val join2 = join.join(broadcasted, "id").join(broadcasted, "id")
       checkAnswer(join2, df)
       assert(
-        collect(join2.queryExecution.executedPlan) {
-          case e: ShuffleExchangeExec => true }.size == 1)
+        join2.queryExecution.executedPlan.collect { case e: ShuffleExchangeExec => true }.size == 1)
       assert(
-        collect(join2.queryExecution.executedPlan) {
-          case e: BroadcastExchangeExec => true }.size === 1)
+        join2.queryExecution.executedPlan
+          .collect { case e: BroadcastExchangeExec => true }.size === 1)
       assert(
-        collect(join2.queryExecution.executedPlan) { case e: ReusedExchangeExec => true }.size == 4)
+        join2.queryExecution.executedPlan.collect { case e: ReusedExchangeExec => true }.size == 4)
     }
   }
 
