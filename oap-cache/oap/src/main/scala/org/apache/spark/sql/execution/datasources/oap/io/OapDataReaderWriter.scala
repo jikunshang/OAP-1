@@ -180,7 +180,8 @@ private[oap] class OapDataReaderV1(
     enableVectorizedReader: Boolean = false,
     options: Map[String, String] = Map.empty,
     filters: Seq[Filter] = Seq.empty,
-    context: Option[DataFileContext] = None) extends OapDataReader with Logging {
+    context: Option[DataFileContext] = None,
+    file: PartitionedFile = null) extends OapDataReader with Logging {
 
   import org.apache.spark.sql.execution.datasources.oap.INDEX_STAT._
 
@@ -219,6 +220,7 @@ private[oap] class OapDataReaderV1(
     if (meta.dataReaderClassName.equals(OapFileFormat.PARQUET_DATA_FILE_CLASSNAME)) {
       fileScanner.asInstanceOf[ParquetDataFile].setParquetVectorizedContext(
         context.asInstanceOf[Option[ParquetVectorizedContext]])
+      fileScanner.asInstanceOf[ParquetDataFile].setPartitionedFile(file)
     } else if (meta.dataReaderClassName.equals(OapFileFormat.ORC_DATA_FILE_CLASSNAME)) {
       // For orc, the context will be used by both vectorization and non vectorization.
       fileScanner.asInstanceOf[OrcDataFile].setOrcDataFileContext(
@@ -227,6 +229,8 @@ private[oap] class OapDataReaderV1(
 
     def fullScan: OapCompletionIterator[Any] = {
       val start = if (log.isDebugEnabled) System.currentTimeMillis else 0
+      logInfo("this file is splitFile, start offset is: " + file.start +
+        ", length is " + file.length + ". However, current impl will read all bytes" )
       val iter = fileScanner.iterator(requiredIds, filters)
       val end = if (log.isDebugEnabled) System.currentTimeMillis else 0
 

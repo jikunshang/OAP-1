@@ -18,6 +18,7 @@
 package org.apache.spark.sql.execution.datasources.oap
 
 import org.apache.hadoop.conf.Configuration
+import org.apache.hadoop.fs.Path
 import org.apache.hadoop.mapreduce.Job
 
 import org.apache.spark.sql.SparkSession
@@ -40,6 +41,11 @@ private[sql] class OptimizedParquetFileFormat extends OapFileFormat {
   override def hashCode(): Int = getClass.hashCode()
 
   override def equals(other: Any): Boolean = other.isInstanceOf[OptimizedParquetFileFormat]
+
+  override def isSplitable(
+      sparkSession: SparkSession,
+      options: Map[String, String],
+      path: Path): Boolean = true
 
   override def prepareWrite(
       sparkSession: SparkSession,
@@ -128,7 +134,7 @@ private[sql] class OptimizedParquetFileFormat extends OapFileFormat {
       }
       val reader = new OapDataReaderV1(file.filePath, m, partitionSchema, requiredSchema,
         filterScanners, requiredIds, pushed, oapMetrics, conf, enableVectorizedReader, options,
-        filters, context)
+        filters, context, file)
       reader.read(file)
     }
   }
