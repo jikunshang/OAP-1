@@ -411,6 +411,14 @@ object OapConf {
       .booleanConf
       .createWithDefault(false)
 
+  val OAP_PARQUET_SPLIT_ENABLED =
+    SqlConfAdapter.buildConf("spark.sql.oap.parquet.split.enable")
+      .internal()
+      .doc("To indicate if a parquet file could be splitable, default false," +
+        "if set to true, it will conflict with OAP index.")
+      .booleanConf
+      .createWithDefault(false)
+
   val OAP_PARQUET_INDEX_ENABLED =
     SqlConfAdapter.buildConf("spark.sql.oap.parquet.index.enable")
       .internal()

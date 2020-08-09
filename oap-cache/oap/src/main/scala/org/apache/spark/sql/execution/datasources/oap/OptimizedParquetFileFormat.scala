@@ -45,7 +45,14 @@ private[sql] class OptimizedParquetFileFormat extends OapFileFormat {
   override def isSplitable(
       sparkSession: SparkSession,
       options: Map[String, String],
-      path: Path): Boolean = true
+      path: Path): Boolean = {
+    val isSplitable = sparkSession.sparkContext.conf.getBoolean(OapConf.OAP_PARQUET_SPLIT_ENABLED.key,
+      OapConf.OAP_PARQUET_SPLIT_ENABLED.defaultValue.get)
+    if (isSplitable) {
+      logWarning("Enable Parquet file splitable will conflict with OAP index!")
+    }
+    isSplitable
+  }
 
   override def prepareWrite(
       sparkSession: SparkSession,
