@@ -229,8 +229,6 @@ private[oap] class OapDataReaderV1(
 
     def fullScan: OapCompletionIterator[Any] = {
       val start = if (log.isDebugEnabled) System.currentTimeMillis else 0
-      logInfo("this file is splitFile, start offset is: " + file.start +
-        ", length is " + file.length + ". However, current impl will read all bytes" )
       val iter = fileScanner.iterator(requiredIds, filters)
       val end = if (log.isDebugEnabled) System.currentTimeMillis else 0
 
