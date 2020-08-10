@@ -228,10 +228,13 @@ class VectorizedCacheReader(
     this.sparkSchema = StructType.fromString(sparkRequestedSchemaString)
     // we should not get all row Groups here
     val rowGroupMetas = footer.getBlocks.asScala
-//    this.rowGroupMetaIter = rowGroupMetas.iterator
-//    for (block <- rowGroupMetas) {
-//      this.totalRowCount += block.getRowCount
-//    }
+    if (file == null) {
+      this.rowGroupMetaIter = rowGroupMetas.iterator
+      for (block <- rowGroupMetas) {
+        this.totalRowCount += block.getRowCount
+      }
+      return
+    }
 
     var rowGourpList = List[BlockMetaData]()
     var currentOffset : Long = 0
