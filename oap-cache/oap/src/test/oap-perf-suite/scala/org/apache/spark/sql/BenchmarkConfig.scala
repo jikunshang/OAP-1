@@ -148,10 +148,10 @@ object BenchmarkConfigSelector {
 trait ParquetOnlyConfigSet extends BenchmarkConfigSelector{
   // TODO: choose conf
   def allConfigurations: Seq[BenchmarkConfig] = Seq(
-    new BenchmarkConfig()
-      .setBenchmarkConfName("parquet w/ index")
-      .setBenchmarkConf(BenchmarkConfig.FILE_FORMAT, "parquet")
-      .setBenchmarkConf(BenchmarkConfig.INDEX_ENABLE, "true"),
+//    new BenchmarkConfig()
+//      .setBenchmarkConfName("parquet w/ index")
+//      .setBenchmarkConf(BenchmarkConfig.FILE_FORMAT, "parquet")
+//      .setBenchmarkConf(BenchmarkConfig.INDEX_ENABLE, "true"),
     new BenchmarkConfig()
       .setBenchmarkConfName("parquet w/o index")
       .setBenchmarkConf(BenchmarkConfig.FILE_FORMAT, "parquet")

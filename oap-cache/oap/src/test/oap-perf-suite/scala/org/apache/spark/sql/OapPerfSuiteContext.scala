@@ -91,7 +91,8 @@ trait OapPerfSuiteContext {
       assert(("sync" !) == 0)
 
       if (!isBootStrapping) {
-        val dropCacheResult = Seq("bash", "-c", "echo 3 > /proc/sys/vm/drop_caches").!
+//        val dropCacheResult = Seq("bash", "-c", "echo 3 > /proc/sys/vm/drop_caches").!
+        val dropCacheResult = Seq("bash", "-c", "sudo sh -c 'echo 3 > /proc/sys/vm/drop_caches'").!
         assert(dropCacheResult == 0)
       }
     }
