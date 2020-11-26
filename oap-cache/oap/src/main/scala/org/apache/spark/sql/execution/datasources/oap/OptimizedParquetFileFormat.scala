@@ -23,7 +23,7 @@ import org.apache.hadoop.mapreduce.Job
 
 import org.apache.spark.sql.SparkSession
 import org.apache.spark.sql.catalyst.InternalRow
-import org.apache.spark.sql.execution.datasources.{OutputWriterFactory, PartitionedFile}
+import org.apache.spark.sql.execution.datasources.{OapException, OutputWriterFactory, PartitionedFile}
 import org.apache.spark.sql.execution.datasources.oap.io.{DataFileContext, OapDataReaderV1, ParquetVectorizedContext}
 import org.apache.spark.sql.execution.datasources.oap.utils.FilterHelper
 import org.apache.spark.sql.internal.SQLConf
@@ -50,6 +50,11 @@ private[sql] class OptimizedParquetFileFormat extends OapFileFormat {
       OapConf.OAP_PARQUET_SPLIT_ENABLED.defaultValue.get)
     if (isSplitable) {
       logWarning("Enable Parquet file splitable will conflict with OAP index!")
+      if (sparkSession.sparkContext.conf.getBoolean(OapConf.OAP_ENABLE_OINDEX.key,
+          OapConf.OAP_ENABLE_OINDEX.defaultValue.get)) {
+        throw new OapException("Please check configuration. " +
+          "Parquet file splitable conflict with OAP index!")
+      }
     }
     isSplitable
   }
